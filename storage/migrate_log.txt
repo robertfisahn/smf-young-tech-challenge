@@ -1,0 +1,41 @@
+
+  Dropping all tables  7.64ms DONE
+
+   INFO  Preparing database.  
+
+  Creating migration table  17.64ms DONE
+
+   INFO  Running migrations.  
+
+  0001_01_01_000000_create_users_table  43.70ms DONE
+  0001_01_01_000001_create_cache_table  32.44ms DONE
+  0001_01_01_000002_create_jobs_table  39.84ms DONE
+  2026_04_06_181004_create_contractors_table  16.10ms DONE
+  2026_04_06_181006_create_invoices_table  9.70ms DONE
+  2026_04_06_181008_create_invoice_items_table  8.87ms DONE
+
+
+   INFO  Seeding database.  
+
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[23000]: Integrity constraint violation: 19 CHECK constraint failed: status (Connection: sqlite, Database: C:/Users/rober/.gemini/antigravity/scratch/smf-young-tech-challenge/database/faktury.sqlite, SQL: insert into "invoices" ("contractor_id", "invoice_number", "date", "total_amount", "currency", "status", "updated_at", "created_at") values (1, FV/2026/04/001, 2026-04-01, 1230.5, PLN, processed, 2026-04-06 19:31:27, 2026-04-06 19:31:27))
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:841
+    837ÔľĽ             $exceptionType = ($isUniqueConstraintError = $this->isUniqueConstraintError($e))
+    838ÔľĽ                 ? UniqueConstraintViolationException::class
+    839ÔľĽ                 : QueryException::class;
+    840ÔľĽ 
+  Ô×ť 841ÔľĽ             $exception = new $exceptionType(
+    842ÔľĽ                 $this->getNameWithReadWriteType(),
+    843ÔľĽ                 $query,
+    844ÔľĽ                 $this->prepareBindings($bindings),
+    845ÔľĽ                 $e,
+
+  1   vendor\laravel\framework\src\Illuminate\Database\Connection.php:587
+      PDOException::("SQLSTATE[23000]: Integrity constraint violation: 19 CHECK constraint failed: status")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\Connection.php:587
+      PDOStatement::execute()
+

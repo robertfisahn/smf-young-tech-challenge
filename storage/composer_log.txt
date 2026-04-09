@@ -1,0 +1,33 @@
+No composer.lock file present. Updating dependencies to latest instead of installing from lock file. See https://getcomposer.org/install for more information.
+Loading composer repositories with package information
+Updating dependencies
+Your requirements could not be resolved to an installable set of packages.
+
+  Problem 1
+    - Root composer.json requires laravel/framework, it could not be found in any version, there may be a typo in the package name.
+  Problem 2
+    - Root composer.json requires laravel/tinker, it could not be found in any version, there may be a typo in the package name.
+  Problem 3
+    - Root composer.json requires smalot/pdfparser, it could not be found in any version, there may be a typo in the package name.
+  Problem 4
+    - Root composer.json requires thiagoalessio/tesseract-ocr-for-php, it could not be found in any version, there may be a typo in the package name.
+  Problem 5
+    - Root composer.json requires fakerphp/faker, it could not be found in any version, there may be a typo in the package name.
+  Problem 6
+    - Root composer.json requires laravel/pail, it could not be found in any version, there may be a typo in the package name.
+  Problem 7
+    - Root composer.json requires laravel/pint, it could not be found in any version, there may be a typo in the package name.
+  Problem 8
+    - Root composer.json requires mockery/mockery, it could not be found in any version, there may be a typo in the package name.
+  Problem 9
+    - Root composer.json requires nunomaduro/collision, it could not be found in any version, there may be a typo in the package name.
+  Problem 10
+    - Root composer.json requires phpunit/phpunit, it could not be found in any version, there may be a typo in the package name.
+
+Potential causes:
+ - A typo in the package name
+ - The package is not available in a stable-enough version according to your minimum-stability setting
+   see <https://getcomposer.org/doc/04-schema.md#minimum-stability> for more details.
+ - It's a private package and you forgot to add a custom repository to find it
+
+Read <https://getcomposer.org/doc/articles/troubleshooting.md> for further common problems.

@@ -1,0 +1,50 @@
+# Core
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/vendor
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+
+# IDEs
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+
+# Storage & Framework
+/storage/*.key
+/storage/pail
+/storage/app/tmp/*
+/storage/app/invoices/*
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+/bootstrap/cache/*
+
+# Exceptions to keep directories
+!/storage/app/tmp/
+!/storage/app/invoices/
+!/storage/framework/cache/data/
+!/storage/framework/sessions/
+!/storage/framework/testing/
+!/storage/framework/views/
+!/storage/logs/
+!/bootstrap/cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log

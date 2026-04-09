@@ -1,0 +1,628 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "SMF Young Tech Challenge — Invoice API",
+        "version": "1.0.0",
+        "description": "REST API do zarządzania fakturami z autoryzacją Bearer Token (JWT-style). Globalna obsługa błędów zwraca ujednolicone JSONy."
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000/api",
+            "description": "Lokalny serwer"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "description": "Użyj tokena uzyskanego z /api/login (np. 'user-id-1') lub testowego 'secret-token-123'"
+            }
+        },
+        "responses": {
+            "Unauthorized": {
+                "description": "Błąd autoryzacji - brak lub nieprawidłowy token Bearer",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "NotFound": {
+                "description": "Zasób nie został znaleziony",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "ValidationError": {
+                "description": "Błąd walidacji danych wejściowych",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/ValidationErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "ErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Unauthenticated"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Zaloguj się, aby uzyskać dostęp."
+                    }
+                }
+            },
+            "ValidationErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Validation Error"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Przesłane dane są nieprawidłowe."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "Invoice": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "contractor_id": {
+                        "type": "integer"
+                    },
+                    "invoice_number": {
+                        "type": "string",
+                        "example": "INV/2026/0001"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "total_amount": {
+                        "type": "number",
+                        "example": 2500.00
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "PLN"
+                    }
+                }
+            },
+            "InvoiceDetail": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Invoice"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "contractor": {
+                                "$ref": "#/components/schemas/Contractor"
+                            },
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/InvoiceItem"
+                                }
+                            },
+                            "payments": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Payment"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "Contractor": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "ACME Innovations Ltd."
+                    },
+                    "tax_id": {
+                        "type": "string",
+                        "example": "987-654-32-10"
+                    },
+                    "address": {
+                        "type": "string"
+                    }
+                }
+            },
+            "InvoiceItem": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Konsultacje Projektowe"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "example": 2
+                    },
+                    "unit_price": {
+                        "type": "number",
+                        "example": 500.00
+                    },
+                    "total_price": {
+                        "type": "number",
+                        "example": 1000.00
+                    }
+                }
+            },
+            "Payment": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "number",
+                        "example": 2500.00
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "PLN"
+                    },
+                    "method": {
+                        "type": "string",
+                        "example": "przelew"
+                    },
+                    "paid_at": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    }
+                }
+            },
+            "StoreInvoice": {
+                "type": "object",
+                "required": [
+                    "contractor_id",
+                    "invoice_number",
+                    "date",
+                    "total_amount",
+                    "currency"
+                ],
+                "properties": {
+                    "contractor_id": {
+                        "type": "integer"
+                    },
+                    "invoice_number": {
+                        "type": "string",
+                        "example": "INV/2026/0001"
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "total_amount": {
+                        "type": "number",
+                        "example": 2500.00
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "PLN",
+                        "maxLength": 3
+                    }
+                }
+            },
+            "OcrResult": {
+                "type": "object",
+                "properties": {
+                    "ocr_text": {
+                        "type": "string"
+                    },
+                    "ai_parsed": {
+                        "type": "object",
+                        "properties": {
+                            "contractor_name": {
+                                "type": "string"
+                            },
+                            "contractor_nip": {
+                                "type": "string"
+                            },
+                            "invoice_number": {
+                                "type": "string"
+                            },
+                            "date": {
+                                "type": "string"
+                            },
+                            "total_amount": {
+                                "type": "number"
+                            },
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/InvoiceItem"
+                                }
+                            }
+                        }
+                    },
+                    "file_path": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "paths": {
+        "/login": {
+            "post": {
+                "summary": "Logowanie i pobranie tokena Bearer",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "user1234"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sukces",
+                        "content": {
+                            "application/json": {
+                                "example": {
+                                    "access_token": "user-id-1",
+                                    "token_type": "Bearer"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    }
+                }
+            }
+        },
+        "/invoices": {
+            "get": {
+                "summary": "Lista wszystkich faktur",
+                "tags": [
+                    "Invoices"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista faktur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Invoice"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Utwórz nową fakturę",
+                "tags": [
+                    "Invoices"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreInvoice"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Utworzono",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Invoice"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            }
+        },
+        "/invoices/{id}": {
+            "get": {
+                "summary": "Szczegóły faktury",
+                "tags": [
+                    "Invoices"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Szczegóły",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/InvoiceDetail"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    }
+                }
+            },
+            "put": {
+                "summary": "Aktualizuj fakturę (Pełna edycja)",
+                "tags": [
+                    "Invoices"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreInvoice"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Częściowa aktualizacja faktury (np. sama płatność)",
+                "tags": [
+                    "Invoices"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "przelew",
+                                            "gotówka",
+                                            "karta"
+                                        ]
+                                    },
+                                    "invoice_number": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Usuń fakturę",
+                "tags": [
+                    "Invoices"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usunięto"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    }
+                }
+            }
+        },
+        "/invoices/upload": {
+            "post": {
+                "summary": "Upload pliku + OCR + AI",
+                "tags": [
+                    "OCR"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "required": [
+                                    "file"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Wynik",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OcrResult"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationError"
+                    }
+                }
+            }
+        }
+    }
+}
