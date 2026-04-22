@@ -1,178 +1,169 @@
 # 🧾 SMF Young Tech Challenge — Invoice Processing System
 
-Aplikacja Laravel do automatycznego zarządzania fakturami, zintegrowana z silnikiem OCR oraz Agentem AI do inteligentnej ekstrakcji danych.
+Aplikacja Laravel do automatycznego przetwarzania faktur. Silnik OCR ekstrahuje tekst z przesłanych dokumentów (PDF, JPG, PNG), a agent AI (Groq lub Ollama) parsuje dane strukturalne — numer faktury, daty, pozycje, kwoty, dane kontrahenta. Wyniki trafiają do zarządzalnego dashboardu z historią dokumentów i pełnym REST API.
 
-## 📌 Wersje projektu
-
-| Wersja | Opis | Tag |
-|--------|------|-----|
-| `v1.0.0` | Wersja z dnia 09.04 — oryginalna wersja rekrutacyjna | [v1.0.0](https://github.com/robertfisahn/smf-young-tech-challenge/releases/tag/v1.0.0) |
-| `v1.0.1` | Dodano skrypty setup, poprawki .env.example | [v1.0.1](https://github.com/robertfisahn/smf-young-tech-challenge/releases/tag/v1.0.1) |
-
-> Aby przetestować konkretną wersję:
-> ```bash
-> git clone https://github.com/robertfisahn/smf-young-tech-challenge.git
-> cd smf-young-tech-challenge
-> git checkout v1.0.0   # wersja rekrutacyjna z 09.04
-> git checkout v1.0.1   # wersja z usprawnieniami
-> git checkout main     # powrót do najnowszej
-> ```
+🏗️ [Opis architektury](ARCHITECTURE.md)
 
 ---
 
-> ### ⚡ **SZYBKIE URUCHOMIENIE (Docker Hub)**
-> Nie wymaga budowania obrazu lokalnie — pobiera gotowy obraz z Docker Hub.
-> ```bash
-> git clone https://github.com/robertfisahn/smf-young-tech-challenge.git
-> cd smf-young-tech-challenge
-> cp .env.example .env
-> # Uzupełnij GROQ_API_KEY w pliku .env
-> docker-compose -f docker-compose.hub.yml up -d
-> ```
-> Aplikacja dostępna pod: `http://localhost:8000`
+<details open>
+<summary>⚡ <strong>Szybkie uruchomienie — Docker Hub (zalecane)</strong></summary>
+<br>
 
----
-
-## 🚀 Realizacja zadań (Zgodnie z wymaganiami)
-
-### **1. Aplikacja CRUD (Laravel)**
-System posiada kompletny moduł zarządzania fakturami (Invoices):
-- Lista wszystkich faktur z informacją o statusie płatności.
-- Szczegółowy podgląd faktury wraz z pozycjami i danymi kontrahenta.
-- Formularz tworzenia i edycji faktur (ręczny oraz automatyczny przez OCR).
-- Bezpieczne usuwanie faktur wraz z załącznikami.
-
-### **2. Upload pliku – faktura/paragon**
-- Możliwość przesłania plików w formatach **PDF, JPG, PNG**.
-- Pliki są bezpiecznie przechowywane na serwerze (`storage/app/invoices`).
-- System obsługuje przesyłanie plików przez Drag & Drop oraz tradycyjny wybór pliku.
-
-### **3. Silnik OCR (Open-Source PHP)**
-Do ekstrakcji tekstu z dokumentów wykorzystano wyłącznie darmowe rozwiązania open-source:
-- **smalot/pdfparser** — do szybkiego wyciągania tekstu bezpośrednio z plików PDF.
-- **thiagoalessio/tesseract-ocr** — jako wrapper dla silnika Tesseract OCR (JPG/PNG oraz fallback dla PDF).
-
-### **4. Kategoryzacja danych + Agent AI**
-Aplikacja wykorzystuje inteligentnego agenta AI, który analizuje surowy tekst z OCR i zamienia go na ustrukturyzowany JSON.
-- **Multi-Provider**: Wsparcie dla **Groq API** oraz **Ollama**.
-- **AiPromptService**: Centralny system reguł (promptów) zapewniający precyzję ekstrakcji danych.
-
-### **5. Baza danych — SQLite**
-- Schemat bazy obejmuje tabele: `contractors`, `invoices`, `invoice_items`, `payments`.
-
-### **6. Prezentacja wyników (REST API + Swagger)**
-- Pełne REST API wspierające metody GET, POST, PUT, PATCH, DELETE.
-- **Swagger / OpenAPI**: Interaktywna dokumentacja dostępna pod adresem: `/api-docs.html`.
-
-### **7. Wymagania repozytorium GitHub**
-Repozytorium publiczne: **smf-young-tech-challenge**
-- ✅ README.md z instrukcją uruchomienia
-- ✅ Opis architektury (sekcja poniżej oraz `ARCHITECTURE.md`)
-- ✅ Przykładowa faktura testowa (`public/invoice_sample.pdf`)
-- ✅ Plik `.env.example`
-
----
-
-## ⚙️ Instrukcja uruchomienia
-
-```bash
-git clone https://github.com/robertfisahn/smf-young-tech-challenge.git
-cd smf-young-tech-challenge
-```
-
-### **Metoda 1: Docker Lokalnie**
+Najszybszy sposób — pobiera gotowy, skompilowany obraz z Docker Hub. Nie wymaga budowania lokalnie ani instalacji PHP.
 
 **Wymagania:** Docker Desktop
 
 ```bash
-# 1. Skopiuj plik środowiskowy
+git clone https://github.com/robertfisahn/smf-young-tech-challenge.git
+cd smf-young-tech-challenge
 cp .env.example .env
+```
 
-# 2. Uzupełnij GROQ_API_KEY w pliku .env
+Otwórz plik `.env` i uzupełnij jedną zmienną:
 
-# 3. Uruchom kontenery
+| Zmienna | Co ustawić |
+|---------|-----------|
+| `GROQ_API_KEY` | Wygeneruj darmowy klucz na [console.groq.com/keys](https://console.groq.com/keys) |
+
+> **Uwaga:** `TESSERACT_PATH`, `DB_DATABASE` i `OLLAMA_URL` są automatycznie ustawiane przez Docker — nie trzeba ich zmieniać.
+
+```bash
+docker-compose -f docker-compose.hub.yml up -d
+```
+
+✅ Aplikacja dostępna pod: **http://localhost:8000**
+🔑 Dane logowania: `user@example.com` / `user1234`
+
+> **💡 Ollama w trybie Docker:** Aby korzystać z lokalnego modelu AI, Ollama musi być uruchomiona z `OLLAMA_HOST=0.0.0.0`. Szczegóły w sekcji [Konfiguracja Ollama](#-konfiguracja-ollama-lokalny-model-ai).
+
+</details>
+
+---
+
+<details>
+<summary>🔨 <strong>Uruchomienie — Docker build lokalny</strong></summary>
+<br>
+
+Buduje obraz Dockera z kodu źródłowego zamiast pobierania z Docker Hub. Przydatne jeśli chcesz wprowadzić własne zmiany w kodzie przed uruchomieniem.
+
+**Wymagania:** Docker Desktop
+
+```bash
+git clone https://github.com/robertfisahn/smf-young-tech-challenge.git
+cd smf-young-tech-challenge
+cp .env.example .env
+# Uzupełnij GROQ_API_KEY w pliku .env
 docker-compose up -d --build
 ```
-Aplikacja dostępna pod: `http://localhost:8000`
+
+✅ Aplikacja dostępna pod: **http://localhost:8000**
+🔑 Dane logowania: `user@example.com` / `user1234`
+
+</details>
 
 ---
 
-### **Metoda 2: Lokalnie (skrypt setup)**
+<details>
+<summary>⚙️ <strong>Uruchomienie — lokalnie bez Dockera</strong></summary>
+<br>
+
+Uruchamia aplikację bezpośrednio na hoście, bez kontenerów. Wymaga ręcznej instalacji zależności.
 
 **Wymagania:**
-- PHP >= 8.2
+- PHP >= 8.2 z rozszerzeniem SQLite
 - Composer
 - Tesseract OCR z paczką językową `pol` ([instrukcja instalacji](https://github.com/UB-Mannheim/tesseract/wiki))
-- SQLite (zazwyczaj wbudowany w PHP)
 
-**Windows (PowerShell):**
+**Konfiguracja `.env`**
+
+| Zmienna | Co ustawić | Domyślna wartość |
+|---------|-----------|-----------------|
+| `GROQ_API_KEY` | Klucz API z [console.groq.com/keys](https://console.groq.com/keys) | `your_groq_api_key_here` |
+| `TESSERACT_PATH` | Ścieżka do Tesseract OCR | `C:/Program Files/Tesseract-OCR/tesseract.exe` |
+
+> **Tip:** Na Linux/macOS ustaw `TESSERACT_PATH=tesseract` (jeśli jest w PATH).
+
+**Windows (PowerShell)**
 ```powershell
-# 1. Sklonuj repozytorium
 git clone https://github.com/robertfisahn/smf-young-tech-challenge.git
-
 cd smf-young-tech-challenge
-
-# 2. Uruchom skrypt setup
 ./setup.ps1
-
-# 3. Uzupełnij GROQ_API_KEY w pliku .env (skrypt go utworzy automatycznie)
-
-# 4. Uruchom serwer
 php artisan serve
 ```
 
-**Linux / macOS (Bash):**
+**Linux / macOS**
 ```bash
-# 1. Sklonuj repozytorium
 git clone https://github.com/robertfisahn/smf-young-tech-challenge.git
-
 cd smf-young-tech-challenge
-
-# 2. Uruchom skrypt setup
 chmod +x setup.sh && ./setup.sh
-
-# 3. Uzupełnij GROQ_API_KEY w pliku .env (skrypt go utworzy automatycznie)
-
-# 4. Uruchom serwer
 php artisan serve
 ```
 
-Aplikacja dostępna pod: `http://localhost:8000`
+✅ Aplikacja dostępna pod: **http://localhost:8000**
+🔑 Dane logowania: `user@example.com` / `user1234`
+
+> **💡 Ollama (opcjonalnie):** Zainstaluj [Ollama](https://ollama.com), pobierz model (`ollama pull llama3.1`) i upewnij się, że działa na porcie `11434`. Wybór między Groq a Ollama odbywa się w interfejsie aplikacji.
+
+</details>
 
 ---
 
-## 🏗️ Architektura
+<details>
+<summary>🤖 <strong>Konfiguracja Ollama (lokalny model AI)</strong></summary>
+<br>
 
-Projekt podąża za wzorcem **Service Layer**:
-- `OcrService` — zarządza procesem ekstrakcji tekstu (PDF/JPG/PNG).
-- `AiParserFactory` — wybiera dostawcę AI (Groq/Ollama) i deleguje parsowanie.
-- `AiPromptService` — centralne reguły promptów zapewniające precyzję danych.
-- `InvoiceService` — logika biznesowa zapisu faktur i relacji między modelami.
-- `ProcessOcrJob` — kolejkowanie zadań OCR w tle (Laravel Queues).
+Aplikacja obsługuje lokalne modele AI przez [Ollama](https://ollama.com) jako alternatywę dla Groq — dane nie opuszczają Twojego komputera.
+
+**1. Instalacja i model**
+
+1. Pobierz Ollama: [ollama.com](https://ollama.com)
+2. Pobierz rekomendowany model (najlepszy stosunek szybkości do jakości ekstrakcji):
+   ```bash
+   ollama pull llama3.1
+   ```
+3. Ustaw model w `.env`:
+   ```
+   OLLAMA_MODEL=llama3.1
+   ```
+
+> Jeśli `llama3.1` (8b) jest zbyt wolny, spróbuj `llama3.2:3b`. Na mocnym sprzęcie możesz przetestować `qwen2.5:7b`.
+
+**2. Udostępnianie dla Dockera**
+
+Domyślnie Ollama słucha tylko na `127.0.0.1`. Aby kontener Docker mógł się z nią połączyć:
+
+*Windows (PowerShell):*
+```powershell
+[System.Environment]::SetEnvironmentVariable("OLLAMA_HOST", "0.0.0.0", "User")
+```
+Po wykonaniu komendy zrestartuj Ollama (Quit w trayu i uruchom ponownie).
+
+*Linux / macOS:*
+```bash
+OLLAMA_HOST=0.0.0.0 ollama serve
+```
+
+**3. Smart-Config — automatyczne wykrywanie środowiska**
+
+Projekt wykrywa automatycznie czy działa w Dockerze i przełącza się między `localhost` a `host.docker.internal`. Nie musisz zmieniać `OLLAMA_URL` przy zmianie trybu uruchomienia.
+
+</details>
 
 ---
 
-## 📄 Generator Faktur (Testy)
+<details>
+<summary>📌 <strong>Wersje projektu</strong></summary>
+<br>
 
-Aplikacja posiada wbudowany generator faktur testowych (PDF, JPG, PNG) — link dostępny w górnym menu nawigacyjnym. Gotowa faktura testowa znajduje się w `public/invoice_sample.pdf`.
-
----
-
-## 🌟 Punkty dodatkowe (Zrealizowane)
-
-- [x] **Docker** — pełna konteneryzacja (PHP, Nginx, Tesseract).
-- [x] **Kolejkowanie OCR** — przetwarzanie zadań OCR w tle (Laravel Queues).
-- [x] **Testy** — pakiet testów jednostkowych i integracyjnych (`phpunit`).
-- [x] **Autoryzacja** — system logowania (Simple Token Auth dla API).
-- [x] **Prosty UI** — nowoczesny, responsywny interfejs zbudowany w Tailwind CSS.
-- [x] **Generator Faktur** — wbudowane narzędzie do generowania testowych dokumentów PDF/IMG.
-
----
-
-## 🧪 Testowanie
+| Wersja | Opis | Tag |
+|--------|------|-----|
+| `v1.0.1` | Skrypty setup, poprawki .env.example | [v1.0.1](https://github.com/robertfisahn/smf-young-tech-challenge/releases/tag/v1.0.1) |
+| `v1.0.0` | Oryginalna wersja rekrutacyjna (09.04) | [v1.0.0](https://github.com/robertfisahn/smf-young-tech-challenge/releases/tag/v1.0.0) |
 
 ```bash
-php artisan test
-# lub
-vendor/bin/phpunit
+git checkout v1.0.0   # wersja rekrutacyjna
+git checkout main     # powrót do najnowszej
 ```
+
+</details>

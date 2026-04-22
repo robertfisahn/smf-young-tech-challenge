@@ -34,7 +34,7 @@ if command -v composer &> /dev/null; then
     php artisan key:generate --force
     
     echo "Migracje i seed bazy danych..."
-    php artisan migrate --force --seed
+    php artisan migrate:fresh --seed
     
     echo "Gotowe! Uruchom aplikacje: php artisan serve"
 else

@@ -31,7 +31,7 @@ if (Get-Command "composer" -ErrorAction SilentlyContinue) {
     php artisan key:generate --force
     
     Write-Host "Migracje i seed bazy danych..." -ForegroundColor Cyan
-    php artisan migrate --force --seed
+    php artisan migrate:fresh --seed
     
     Write-Host "Gotowe! Uruchom aplikacje: php artisan serve" -ForegroundColor Green
 } else {

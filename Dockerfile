@@ -23,16 +23,6 @@ WORKDIR /var/www
 
 COPY . .
 
-RUN mkdir -p \
-    storage/logs \
-    storage/framework/cache \
-    storage/framework/sessions \
-    storage/framework/views \
-    bootstrap/cache \
-    database
-
-RUN chmod -R 775 storage bootstrap/cache database
-
 RUN composer install --no-interaction --prefer-dist --no-dev
 
 EXPOSE 8000
