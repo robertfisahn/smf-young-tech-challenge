@@ -25,7 +25,9 @@ return [
     ],
 
     'ollama' => [
-        'api_url' => env('OLLAMA_URL', 'http://localhost:11434'),
+        'api_url' => file_exists('/.dockerenv') 
+            ? 'http://host.docker.internal:11434' 
+            : env('OLLAMA_URL', 'http://localhost:11434'),
         'model' => env('OLLAMA_MODEL', 'llama3.1'),
     ],
 
