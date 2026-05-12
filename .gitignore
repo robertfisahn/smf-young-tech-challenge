@@ -44,6 +44,17 @@ Homestead.yaml
 !/storage/logs/
 !/bootstrap/cache/
 
+# Database (Ignore sqlite, keep migrations)
+/*.sqlite
+/*.sqlite-journal
+/database/*.sqlite
+/database/*.sqlite-journal
+
+# Project Specific
+/docs/
+/agent/
+/.gemini/
+
 # OS files
 .DS_Store
 Thumbs.db

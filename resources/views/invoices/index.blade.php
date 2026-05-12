@@ -52,11 +52,9 @@
                             <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <div class="flex items-center justify-end space-x-3">
                                     @if(!($totalDue > 0 && $totalPaid >= $totalDue))
-                                        <form action="{{ route('invoices.update', $invoice) }}" method="POST" class="inline">
+                                        <form action="{{ route('invoices.mark-as-paid', $invoice) }}" method="POST" class="inline">
                                             @csrf
                                             @method('PATCH')
-                                            <input type="hidden" name="payment_method" value="gotówka">
-                                            <input type="hidden" name="total_amount" value="{{ $totalDue }}">
                                             <button type="submit" class="inline-flex items-center rounded-md bg-green-100 px-2 py-1 text-[10px] font-bold text-green-700 border border-green-200 hover:bg-green-600 hover:text-white transition-colors duration-200">
                                                 Oznacz jako opłacone
                                             </button>

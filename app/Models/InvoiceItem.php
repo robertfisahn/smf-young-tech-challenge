@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class InvoiceItem extends Model
+final class InvoiceItem extends Model
 {
     use HasFactory;
 
@@ -18,7 +20,10 @@ class InvoiceItem extends Model
         'total_price'
     ];
 
-    public function invoice()
+    /**
+     * @return BelongsTo<Invoice, InvoiceItem>
+     */
+    public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }

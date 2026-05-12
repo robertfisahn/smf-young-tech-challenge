@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Invoice extends Model
+final class Invoice extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'contractor_id',
@@ -17,28 +21,37 @@ class Invoice extends Model
         'file_path',
     ];
 
-    public function contractor()
+    /**
+     * @return BelongsTo<Contractor, Invoice>
+     */
+    public function contractor(): BelongsTo
     {
         return $this->belongsTo(Contractor::class);
     }
 
-    public function items()
+    /**
+     * @return HasMany<InvoiceItem>
+     */
+    public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
     }
 
-    public function payments()
+    /**
+     * @return HasMany<Payment>
+     */
+    public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
-    public function getTotalAmountAttribute()
+    public function getTotalAmountAttribute(): float
     {
-        return $this->payments->sum('amount');
+        return (float) $this->payments->sum('amount');
     }
 
-    public function getCurrencyAttribute()
+    public function getCurrencyAttribute(): string
     {
-        return $this->payments->first()->currency ?? 'PLN';
+        return $this->payments->first()?->currency ?? 'PLN';
     }
 }
